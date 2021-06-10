@@ -58,6 +58,7 @@ class EdgeModel(BaseModel):
         graph.e = super().forward(graph, concat_graph=concat_graph)
         return graph
 
+
 class NodeModel(BaseModel):
     def collect_attrs(self, graph):
         if self.independent:
@@ -84,6 +85,7 @@ class NodeModel(BaseModel):
     def forward(self, graph, concat_graph=None):
         graph.x = super().forward(graph, concat_graph=concat_graph)
         return graph
+
 
 class GlobalModel(BaseModel):
     def collect_attrs(self, graph):
