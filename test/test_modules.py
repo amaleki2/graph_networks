@@ -124,7 +124,6 @@ class GraphModulesTest(unittest.TestCase):
         self.assertEqual(o.x.size(1), 8)
         self.assertEqual(o.u.size(1), 2)
         self.assertEqual(o.e.size(1), 16)
-        print(o)
 
     def test_concat(self):
         data1 = self.get_random_pyg_data()

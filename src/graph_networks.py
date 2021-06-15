@@ -27,5 +27,3 @@ class EncodeProcessDecode(torch.nn.Module):
         else:
             out = self.outputer(decoded)
         return out
-
-
