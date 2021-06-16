@@ -33,7 +33,8 @@ class EncodeProcessDecode(torch.nn.Module):
             graph_type = params.pop("graph_type", "GraphNetwork")
             return self.graph_classes[graph_type](**params)
 
-    def forward(self, graph):
+    def forward(self, graph0):
+        graph = graph0.clone()  # dont change the input
         graph = self.encoder(graph)
         encoded = graph.clone()
         for i in range(self.num_processing_steps):
