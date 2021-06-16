@@ -9,7 +9,8 @@ __all__ = ['make_lazy_mlp_model',
            'cast_edges_to_nodes',
            'cast_globals_to_edges',
            'cast_edges_to_globals',
-           'cast_nodes_to_globals']
+           'cast_nodes_to_globals',
+           'cast_faces_to_nodes']
 
 
 def make_mlp_model(n_input, latent_sizes, n_output, activate_final=False, normalize=True):
@@ -114,3 +115,7 @@ def cast_nodes_to_globals(node_attr, batch=None, num_globals=None):
 def cast_edges_to_nodes(edge_attr, indices, num_nodes=None):
     edge_attr_aggr = scatter_sum(edge_attr, indices, dim=0, dim_size=num_nodes)
     return edge_attr_aggr
+
+
+def cast_faces_to_nodes(face_attr, indices, num_nodes=None):
+    return cast_edges_to_nodes(face_attr, indices, num_nodes=num_nodes)

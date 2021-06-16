@@ -1,6 +1,6 @@
 import torch
 import unittest
-from src.modules import EdgeModel, GraphNetwork, NodeModel, GlobalModel
+from src.modules import EdgeModel, GraphNetwork, NodeModel, GlobalModel, FaceModel
 from torch_geometric.data import Data, DataLoader
 
 
@@ -9,6 +9,8 @@ class GraphModulesTest(unittest.TestCase):
         graph_data = [Data(x=torch.rand(3, 4),
                            e=torch.rand(5, 3),
                            u=torch.rand(1, 2),
+                           f=torch.rand(4, 1),
+                           face_index=torch.randint(3, (3, 4)),
                            edge_index=torch.randint(3, (2, 5))) for _ in range(n_data)]
         data = DataLoader(graph_data, batch_size=2, shuffle=True)
         if get_first_element:
@@ -59,6 +61,16 @@ class GraphModulesTest(unittest.TestCase):
                            independent=True)
         model2(data)
 
+        model3 = NodeModel(n_feat_out=16,
+                           latent_sizes=16,
+                           activate_final=True,
+                           with_globals=False,
+                           with_faces=True,
+                           with_senders=True,
+                           normalize=True,
+                           independent=False)
+        model3(data)
+
     def test_global_model(self):
         data = self.get_random_pyg_data()
         model1 = GlobalModel(n_feat_out=16,
@@ -66,6 +78,15 @@ class GraphModulesTest(unittest.TestCase):
                              activate_final=True,
                              normalize=True,
                              independent=False)
+        model1(data)
+
+    def test_face_model(self):
+        data = self.get_random_pyg_data()
+        model1 = FaceModel(n_feat_out=16,
+                           latent_sizes=16,
+                           activate_final=True,
+                           normalize=True,
+                           independent=False)
         model1(data)
 
     def test_make_mlp(self):
@@ -125,6 +146,24 @@ class GraphModulesTest(unittest.TestCase):
         self.assertEqual(o.u.size(1), 2)
         self.assertEqual(o.e.size(1), 16)
 
+        face_model_params = dict(n_feat_out=16,
+                                 latent_sizes=16,
+                                 activate_final=True,
+                                 normalize=True,
+                                 independent=False)
+
+        model3 = GraphNetwork(edge_model_params=edge_model_params,
+                              node_model_params=node_model_params,
+                              face_model_params=face_model_params,
+                              global_model_params=global_model_params)
+        for d in data:
+            o = model3(d)
+
+        self.assertEqual(o.x.size(1), 8)
+        self.assertEqual(o.u.size(1), 5)
+        self.assertEqual(o.e.size(1), 16)
+        self.assertEqual(o.f.size(1), 5)
+
     def test_concat(self):
         data1 = self.get_random_pyg_data()
         data2 = self.get_random_pyg_data()
@@ -136,6 +175,7 @@ class GraphModulesTest(unittest.TestCase):
                            normalize=True,
                            independent=False)
         model1(data1, concat_graph=data2)
+
 
 
 if __name__ == '__main__':

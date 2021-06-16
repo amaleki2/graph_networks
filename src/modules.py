@@ -4,6 +4,7 @@ from .utils import *
 
 INCLUDE_GLOBALS_DEFAULT = True
 INCLUDE_SENDERS_DEFAULT = False
+INCLUDE_FACES_DEFAULT = False
 
 
 class BaseModel(torch.nn.Module):
@@ -41,17 +42,21 @@ class EdgeModel(BaseModel):
         if self.independent:
             return [graph.e]
 
-        node_attr, edge_attr, global_attr, edge_index, batch = graph.x, graph.e, graph.u, graph.edge_index, graph.batch
-        num_nodes, num_edges, num_globals = node_attr.size(0), edge_attr.size(0), global_attr.size(0)
+        node_attr, edge_attr, edge_index, batch = graph.x, graph.e, graph.edge_index, graph.batch
+        num_edges = edge_attr.size(0)
         row, col = edge_index
         sender_attr, receiver_attr = node_attr[row, :], node_attr[col, :]
         out = [edge_attr, receiver_attr, sender_attr]
 
         with_globals = self.kwargs.get('with_globals', INCLUDE_GLOBALS_DEFAULT)
         if with_globals:
-            global_attr_scattered = cast_globals_to_edges(global_attr, edge_index=edge_index, batch=batch,
+            global_attr = graph.u
+            global_attr_scattered = cast_globals_to_edges(global_attr,
+                                                          edge_index=edge_index,
+                                                          batch=batch,
                                                           num_edges=num_edges)
             out.append(global_attr_scattered)
+
         return out
 
     def forward(self, graph, concat_graph=None):
@@ -64,8 +69,8 @@ class NodeModel(BaseModel):
         if self.independent:
             return [graph.x]
 
-        node_attr, edge_attr, global_attr, edge_index, batch = graph.x, graph.e, graph.u, graph.edge_index, graph.batch
-        num_nodes, num_edges, num_globals = node_attr.size(0), edge_attr.size(0), global_attr.size(0)
+        node_attr, edge_attr, edge_index, batch = graph.x, graph.e, graph.edge_index, graph.batch
+        num_nodes = node_attr.size(0)
         row, col = edge_index
         receiver_attr_to_node = cast_edges_to_nodes(edge_attr, col, num_nodes=num_nodes)
         out = [node_attr, receiver_attr_to_node]
@@ -77,13 +82,41 @@ class NodeModel(BaseModel):
 
         with_globals = self.kwargs.get('with_globals', INCLUDE_GLOBALS_DEFAULT)
         if with_globals:
+            global_attr = graph.u
             global_attr_to_nodes = cast_globals_to_nodes(global_attr, batch=batch, num_nodes=num_nodes)
             out.append(global_attr_to_nodes)
+
+        with_faces = self.kwargs.get('with_faces', INCLUDE_FACES_DEFAULT)
+        if with_faces:
+            face_attr = graph.f
+            indices = graph.face_index[0]
+            face_attr_scattered = cast_faces_to_nodes(face_attr,
+                                                      indices,
+                                                      num_nodes=num_nodes)
+            out.append(face_attr_scattered)
+
 
         return out
 
     def forward(self, graph, concat_graph=None):
         graph.x = super().forward(graph, concat_graph=concat_graph)
+        return graph
+
+
+class FaceModel(BaseModel):
+    # because face node have no meaningful order, we need to aggregated nodal attributes.
+    def collect_attrs(self, graph):
+        if self.independent:
+            return [graph.f]
+
+        node_attr, edge_attr, face_attr, face_index, batch = graph.x, graph.e, graph.f, graph.face_index, graph.batch
+        node_attr_scattered = node_attr[face_index].mean(dim=0)
+        out = [face_attr, node_attr_scattered]
+
+        return out
+
+    def forward(self, graph, concat_graph=None):
+        graph.f = super().forward(graph, concat_graph=concat_graph)
         return graph
 
 
@@ -100,6 +133,7 @@ class GlobalModel(BaseModel):
         edge_attr_aggr = cast_edges_to_globals(edge_attr, edge_index=edge_index, batch=batch,
                                                num_edges=num_edges, num_globals=num_globals)
         out = [global_attr, node_attr_aggr, edge_attr_aggr]
+
         return out
 
     def forward(self, graph, concat_graph=None):
@@ -111,6 +145,7 @@ class GraphNetwork(torch.nn.Module):
     def __init__(self,
                  edge_model_params=None,
                  node_model_params=None,
+                 face_model_params=None,
                  global_model_params=None):
         super(GraphNetwork, self).__init__()
 
@@ -124,6 +159,11 @@ class GraphNetwork(torch.nn.Module):
         else:
             self.node_model = NodeModel(**node_model_params)
 
+        if face_model_params is None:
+            self.face_model = None
+        else:
+            self.face_model = FaceModel(**global_model_params)
+
         if global_model_params is None:
             self.global_model = None
         else:
@@ -131,6 +171,7 @@ class GraphNetwork(torch.nn.Module):
 
     def forward(self, graph, concat_graph=None):
         graph = self.edge_model(graph, concat_graph=concat_graph) if self.edge_model is not None else graph
+        graph = self.face_model(graph, concat_graph=concat_graph) if self.face_model is not None else graph
         graph = self.node_model(graph, concat_graph=concat_graph) if self.node_model is not None else graph
         graph = self.global_model(graph, concat_graph=concat_graph) if self.global_model is not None else graph
         return graph

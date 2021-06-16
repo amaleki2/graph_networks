@@ -21,6 +21,8 @@ class GraphEPDTest(unittest.TestCase):
         graph_data = [Data(x=torch.rand(3, 4),
                            e=torch.rand(5, 3),
                            u=torch.rand(1, 2),
+                           f=torch.rand(4, 1),
+                           face_index=torch.randint(3, (3, 4)),
                            edge_index=torch.randint(3, (2, 5))) for _ in range(n_data)]
         data = DataLoader(graph_data, batch_size=2, shuffle=True)
         if get_first_element:
@@ -43,6 +45,11 @@ class GraphEPDTest(unittest.TestCase):
 
         model2 = EncodeProcessDecode(**model_params)
         model2(data1)
+
+        model_params["encoder_params"]["face_model_params"] = None
+
+        model3 = EncodeProcessDecode(**model_params)
+        model3(data1)
 
 
 if __name__ == '__main__':
