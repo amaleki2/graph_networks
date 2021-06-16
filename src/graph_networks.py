@@ -16,7 +16,8 @@ class EncodeProcessDecode(torch.nn.Module):
         self.decoder   = GraphNetwork(**decoder_params)
         self.outputer  = GraphNetwork(**outputer_params) if outputer_params is not None else None
 
-    def forward(self, graph):
+    def forward(self, graph0):
+        graph = graph0.clone()  # don't change the input
         graph = self.encoder(graph)
         encoded = graph.clone()
         for i in range(self.num_processing_steps):
