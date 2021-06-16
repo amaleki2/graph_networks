@@ -162,7 +162,7 @@ class GraphNetwork(torch.nn.Module):
         if face_model_params is None:
             self.face_model = None
         else:
-            self.face_model = FaceModel(**global_model_params)
+            self.face_model = FaceModel(**face_model_params)
 
         if global_model_params is None:
             self.global_model = None
