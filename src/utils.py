@@ -4,7 +4,7 @@ from torch.nn import Sequential, ReLU, Linear, LayerNorm
 try:
     from torch.nn import LazyLinear
 except ImportError:
-    print("torch version is %d. Lazy modules are turned off." % torch.__version__)
+    print("torch version is %s. Lazy modules are turned off." % torch.__version__)
 
 from torch_scatter import scatter_sum
 
