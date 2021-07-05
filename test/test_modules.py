@@ -137,6 +137,18 @@ class GraphModulesTest(unittest.TestCase):
                            independent=False)
         model1(data1, concat_graph=data2)
 
+    def test_no_lazy(self):
+        data1 = self.get_random_pyg_data()
+        data2 = self.get_random_pyg_data()
+        model1 = NodeModel(n_feat_in=20,
+                           n_feat_out=16,
+                           latent_sizes=16,
+                           activate_final=True,
+                           with_globals=False,
+                           with_senders=True,
+                           normalize=True,
+                           independent=False)
+        model1(data1, concat_graph=data2)
 
 if __name__ == '__main__':
     unittest.main()

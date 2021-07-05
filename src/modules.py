@@ -8,6 +8,7 @@ INCLUDE_SENDERS_DEFAULT = False
 
 class BaseModel(torch.nn.Module):
     def __init__(self,
+                 n_feat_in=None,
                  n_feat_out=16,
                  latent_sizes=16,
                  activate_final=True,
@@ -18,10 +19,17 @@ class BaseModel(torch.nn.Module):
         super(BaseModel, self).__init__()
         self.independent = independent
         self.kwargs = kwargs
-        self.mlp = make_lazy_mlp_model(latent_sizes,
-                                       n_feat_out,
-                                       activate_final=activate_final,
-                                       normalize=normalize)
+        if n_feat_in is None:
+            self.mlp = make_lazy_mlp_model(latent_sizes,
+                                           n_feat_out,
+                                           activate_final=activate_final,
+                                           normalize=normalize)
+        else:
+            self.mlp = make_mlp_model(n_feat_in,
+                                      latent_sizes,
+                                      n_feat_out,
+                                      activate_final=activate_final,
+                                      normalize=normalize)
 
     def collect_attrs(self, graph):
         raise NotImplementedError

@@ -1,10 +1,15 @@
-import torch.nn
 import torch
 import torch.nn
-from torch.nn import Sequential, ReLU, Linear, LayerNorm, LazyLinear
+from torch.nn import Sequential, ReLU, Linear, LayerNorm
+try:
+    from torch.nn import LazyLinear
+except ImportError:
+    print("torch version is %d. Lazy modules are turned off." % torch.__version)
+
 from torch_scatter import scatter_sum
 
-__all__ = ['make_lazy_mlp_model',
+__all__ = ['make_mlp_model',
+           'make_lazy_mlp_model',
            'cast_globals_to_nodes',
            'cast_edges_to_nodes',
            'cast_globals_to_edges',
