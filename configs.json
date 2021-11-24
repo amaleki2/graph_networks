@@ -1,0 +1,82 @@
+{
+    "encode_process_decode": {
+        "encoder": {
+            "node_model": {
+                "name": "IndependentNodeModel",
+                "n_node_feats_in": 10,
+                "n_node_feats_out":  10,
+                "latent_sizes": [64, 64],
+                "activate_final": true,
+                "normalize": true
+            },
+            "edge_model": {
+                "name": "IndependentNodeModel",
+                "n_edge_feats_in": 10,
+                "n_edge_feats_out":  10,
+                "latent_sizes": [64, 64],
+                "activate_final": true,
+                "normalize": true
+            },
+            "global_model": {
+                "name": "IndependentNodeModel",
+                "n_edge_feats_in": 10,
+                "n_edge_feats_out":  10,
+                "latent_sizes": [64, 64],
+                "activate_final": true,
+                "normalize": true
+            }
+        },
+        "processor": {
+            "node_model": {
+                "name": "IndependentNodeModel",
+                "n_node_feats_in": 10,
+                "n_node_feats_out":  10,
+                "latent_sizes": [64, 64],
+                "activate_final": true,
+                "normalize": true
+            },
+            "edge_model": {
+                "name": "IndependentNodeModel",
+                "n_edge_feats_in": 10,
+                "n_edge_feats_out":  10,
+                "latent_sizes": [64, 64],
+                "activate_final": true,
+                "normalize": true
+            },
+            "global_model": {
+                "name": "IndependentNodeModel",
+                "n_edge_feats_in": 10,
+                "n_edge_feats_out":  10,
+                "latent_sizes": [64, 64],
+                "activate_final": true,
+                "normalize": true
+            }
+        },
+        "decoder": {
+            "node_model": {
+                "name": "IndependentNodeModel",
+                "n_node_feats_in": 10,
+                "n_node_feats_out":  10,
+                "latent_sizes": [64, 64],
+                "activate_final": true,
+                "normalize": true
+            },
+            "edge_model": {
+                "name": "IndependentNodeModel",
+                "n_edge_feats_in": 10,
+                "n_edge_feats_out":  10,
+                "latent_sizes": [64, 64],
+                "activate_final": true,
+                "normalize": true
+            },
+            "global_model": {
+                "name": "IndependentNodeModel",
+                "n_edge_feats_in": 10,
+                "n_edge_feats_out":  10,
+                "latent_sizes": [64, 64],
+                "activate_final": true,
+                "normalize": true
+            }
+        }
+    }
+}
